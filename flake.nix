@@ -7,7 +7,7 @@
 
     packages.x86_64-linux.default = self.packages.x86_64-linux.hello;
 
-=======
+
   description = "Mi ... kasa?";
 
   inputs = {
@@ -25,7 +25,17 @@
     };
   };
 
-  outputs = { self, nixpkgs, home-manager, hyprland, anyrun, ... }@inputs: {
+  outputs = { self, nixpkgs, home-manager, hyprland, anyrun, ... }@inputs: let
+    inherit (self) outputs;
+    systems = [
+      "aarch64-linux"
+      "i686-linux"
+      "x86_64-linux"
+      "aarch64-darwin"
+      "x86_64-darwin"
+    ];
+    forAllSystems = nixpkgs.lib.genAttrs systems;
+in {
     
     nixosConfigurations = {
 
@@ -50,7 +60,7 @@
 
     homeConfigurations."ahmadreza@nixos" = home-manager.lib.homeManagerConfiguration {
       pkgs = nixpkgs.legacyPackages.x86_64-linux;
-
+      extraSpecialArgs = {inherit inputs outputs;};
       modules = [
         hyprland.homeManagerModules.default
 	{wayland.windowManager.hyprland.enable = true;}
