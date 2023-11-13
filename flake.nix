@@ -25,22 +25,15 @@
     };
   };
 
-  outputs = { self, nixpkgs, home-manager, hyprland, anyrun, ... }@inputs: let
+  outputs = { self, nixpkgs, home-manager, hyprland, anyrun, ... }@inputs: let 
     inherit (self) outputs;
-    systems = [
-      "aarch64-linux"
-      "i686-linux"
-      "x86_64-linux"
-      "aarch64-darwin"
-      "x86_64-darwin"
-    ];
-    forAllSystems = nixpkgs.lib.genAttrs systems;
-in {
+    forEachSystem = nixpkgs.lib.genAttrs ["x86_64-linux"];
+    forEachPlgs = f: forEachSystem (sys: f nixpkgs.legacyPakcages.${sys});
+    in {
     
     nixosConfigurations = {
 
       asus-fx506li = nixpkgs.lib.nixosSystem {
-        system = "x86_64-linux";
 
 	specialArgs =  { inherit inputs; };
 	modules = [
@@ -60,11 +53,12 @@ in {
 
     homeConfigurations."ahmadreza@nixos" = home-manager.lib.homeManagerConfiguration {
       pkgs = nixpkgs.legacyPackages.x86_64-linux;
-      extraSpecialArgs = {inherit inputs outputs;};
+
       modules = [
         hyprland.homeManagerModules.default
 	{wayland.windowManager.hyprland.enable = true;}
       ];
     };
   };
-};
+ };
+}
